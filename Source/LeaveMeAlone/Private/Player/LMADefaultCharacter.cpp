@@ -153,7 +153,7 @@ void ALMADefaultCharacter::RotationPlayerOnCursor()
 
 void ALMADefaultCharacter::StartSprint()
 {
-	if (CurrentStamina > StepLossStamina)
+	if (CurrentStamina > TickLossStamina)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = MaxSprintSpeed;
 		IsRunning = true;
@@ -168,10 +168,10 @@ void ALMADefaultCharacter::StopSprint()
 
 void ALMADefaultCharacter::LossStamina()
 {
-	CurrentStamina -= StepLossStamina;
+	CurrentStamina -= TickLossStamina;
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, FString::Printf(TEXT("Stamina = %f"), CurrentStamina));
 
-	if (CurrentStamina < StepLossStamina)
+	if (CurrentStamina < TickLossStamina)
 	{
 		StopSprint();
 	}
@@ -181,7 +181,7 @@ void ALMADefaultCharacter::RecoveryStamina()
 {
 	if (CurrentStamina < MaxStamina)
 	{
-		CurrentStamina += StepRecoveryStamina;
+		CurrentStamina += TickRecoveryStamina;
 		if (CurrentStamina > MaxStamina)
 		{
 			CurrentStamina = MaxStamina;

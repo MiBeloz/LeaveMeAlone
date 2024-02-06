@@ -63,10 +63,10 @@ protected:
 	float MaxStamina = 100.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Sprint")
-	float StepLossStamina = 0.2f;
+	float TickLossStamina = 0.2f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Sprint")
-	float StepRecoveryStamina = 0.3f;
+	float TickRecoveryStamina = 0.3f;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
