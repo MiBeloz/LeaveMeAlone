@@ -17,13 +17,14 @@ public:
 	ULMAWeaponComponent();
 
 	void Fire();
+	void Reload();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<ALMABaseWeapon> WeaponClass;
 
-	UPROPERTY()
-	ALMABaseWeapon* Weapon = nullptr;
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UAnimMontage* ReloadMontage;
 
 	virtual void BeginPlay() override;
 
@@ -31,5 +32,14 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	UPROPERTY()
+	ALMABaseWeapon* Weapon = nullptr;
+
+	bool AnimReloading = false;
+
 	void SpawnWeapon();
+
+	void InitAnimNotify();
+	void OnNotifyReloadFinished(USkeletalMeshComponent* SkeletalMesh);
+	bool CanReload() const;
 };

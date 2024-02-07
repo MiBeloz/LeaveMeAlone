@@ -3,6 +3,8 @@
 #include "Weapon/LMABaseWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogWeapon, All, All);
+
 ALMABaseWeapon::ALMABaseWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -16,9 +18,16 @@ void ALMABaseWeapon::Fire()
 	Shoot();
 }
 
+void ALMABaseWeapon::ChangeClip()
+{
+	CurrentAmmoWeapon.Bullets = AmmoWeapon.Bullets;
+}
+
 void ALMABaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CurrentAmmoWeapon = AmmoWeapon;
 }
 
 void ALMABaseWeapon::Shoot()
@@ -35,6 +44,23 @@ void ALMABaseWeapon::Shoot()
 	if (HitResult.bBlockingHit) {
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 5.0f, 24, FColor::Red, false, 1.0f);
 	}
+
+	DecrementBullets();
+}
+
+void ALMABaseWeapon::DecrementBullets()
+{
+	CurrentAmmoWeapon.Bullets--;
+	UE_LOG(LogWeapon, Display, TEXT("Bullets = %s"), *FString::FromInt(CurrentAmmoWeapon.Bullets));
+
+	if (IsCurrentClipEmpty()) {
+		ChangeClip();
+	}
+}
+
+bool ALMABaseWeapon::IsCurrentClipEmpty() const
+{
+	return CurrentAmmoWeapon.Bullets == 0;
 }
 
 void ALMABaseWeapon::Tick(float DeltaTime)
