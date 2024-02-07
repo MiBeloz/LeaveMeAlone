@@ -10,14 +10,14 @@ class UCameraComponent;
 class USpringArmComponent;
 class ULMAHealthComponent;
 class UAnimMontage;
+class ULMAWeaponComponent;
 
 UCLASS()
-class LEAVEMEALONE_API ALMADefaultCharacter : public ACharacter
+class LEAVEMEALONE_API ALMADefaultCharacter : public ACharacter 
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	ALMADefaultCharacter();
 
 	UFUNCTION()
@@ -29,6 +29,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UCameraComponent* CameraComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	ULMAWeaponComponent* WeaponComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Health")
 	ULMAHealthComponent* HealthComponent;
@@ -68,14 +71,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sprint")
 	float TickRecoveryStamina = 0.3f;
 
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:

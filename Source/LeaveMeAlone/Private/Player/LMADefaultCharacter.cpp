@@ -1,6 +1,5 @@
 // LeaveMeAlone Game by Netologiya. All RightsReserved.
 
-
 #include "Player/LMADefaultCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/DecalComponent.h"
@@ -11,11 +10,10 @@
 #include "Components/LMAHealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/Engine.h"
+#include "Components/LMAWeaponComponent.h"
 
-// Sets default values
 ALMADefaultCharacter::ALMADefaultCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
@@ -31,6 +29,8 @@ ALMADefaultCharacter::ALMADefaultCharacter()
 	CameraComponent->SetFieldOfView(FOV);
 	CameraComponent->bUsePawnControlRotation = false;
 
+	WeaponComponent = CreateDefaultSubobject<ULMAWeaponComponent>("Weapon");
+
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
@@ -38,7 +38,6 @@ ALMADefaultCharacter::ALMADefaultCharacter()
 	HealthComponent = CreateDefaultSubobject<ULMAHealthComponent>("HealthComponent");
 }
 
-// Called when the game starts or when spawned
 void ALMADefaultCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -55,27 +54,22 @@ void ALMADefaultCharacter::BeginPlay()
 	WalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 }
 
-// Called every frame
 void ALMADefaultCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!(HealthComponent->IsDead()))
-	{
+	if (!(HealthComponent->IsDead())) {
 		RotationPlayerOnCursor();
 	}
 
-	if (IsRunning)
-	{
+	if (IsRunning) {
 		LossStamina();
 	}
-	else
-	{
+	else {
 		RecoveryStamina();
 	}
 }
 
-// Called to bind functionality to input
 void ALMADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -88,18 +82,24 @@ void ALMADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ALMADefaultCharacter::StartSprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ALMADefaultCharacter::StopSprint);
+
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &ULMAWeaponComponent::Fire);
 }
 
-void ALMADefaultCharacter::MoveForward(float Value) {
+void ALMADefaultCharacter::MoveForward(float Value)
+{
 	AddMovementInput(GetActorForwardVector(), Value);
 }
 
-void ALMADefaultCharacter::MoveRight(float Value) {
+void ALMADefaultCharacter::MoveRight(float Value)
+{
 	AddMovementInput(GetActorRightVector(), Value);
 }
 
-void ALMADefaultCharacter::CameraMoveUp() {
+void ALMADefaultCharacter::CameraMoveUp()
+{
 	float TempArmLength = SpringArmComponent->TargetArmLength + ArmLengthSmooth;
+
 	if (TempArmLength >= ArmLengthMax) {
 		SpringArmComponent->TargetArmLength = ArmLengthMax;
 	}
@@ -110,6 +110,7 @@ void ALMADefaultCharacter::CameraMoveUp() {
 
 void ALMADefaultCharacter::CameraMoveDown() {
 	float TempArmLength = SpringArmComponent->TargetArmLength - ArmLengthSmooth;
+
 	if (TempArmLength <= ArmLengthMin) {
 		SpringArmComponent->TargetArmLength = ArmLengthMin;
 	}
@@ -124,8 +125,7 @@ void ALMADefaultCharacter::OnDeath()
 	PlayAnimMontage(DeathMontage);
 	GetCharacterMovement()->DisableMovement();
 	SetLifeSpan(5.0f);
-	if (Controller)
-	{
+	if (Controller) {
 		Controller->ChangeState(NAME_Spectating);
 	}
 }
@@ -138,14 +138,12 @@ void ALMADefaultCharacter::OnHealthChanged(float NewHealth)
 void ALMADefaultCharacter::RotationPlayerOnCursor() 
 {
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (PC)
-	{
+	if (PC) {
 		FHitResult ResultHit;
 		PC->GetHitResultUnderCursor(ECC_GameTraceChannel1, true, ResultHit);
 		float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ResultHit.Location).Yaw;
 		SetActorRotation(FQuat(FRotator(0.0f, FindRotatorResultYaw, 0.0f)));
-		if (CurrentCursor)
-		{
+		if (CurrentCursor) {
 			CurrentCursor->SetWorldLocation(ResultHit.Location);
 		}
 	}
@@ -153,8 +151,7 @@ void ALMADefaultCharacter::RotationPlayerOnCursor()
 
 void ALMADefaultCharacter::StartSprint()
 {
-	if (CurrentStamina > TickLossStamina)
-	{
+	if (CurrentStamina > TickLossStamina) {
 		GetCharacterMovement()->MaxWalkSpeed = MaxSprintSpeed;
 		IsRunning = true;
 	}
@@ -171,19 +168,16 @@ void ALMADefaultCharacter::LossStamina()
 	CurrentStamina -= TickLossStamina;
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, FString::Printf(TEXT("Stamina = %f"), CurrentStamina));
 
-	if (CurrentStamina < TickLossStamina)
-	{
+	if (CurrentStamina < TickLossStamina) {
 		StopSprint();
 	}
 }
 
 void ALMADefaultCharacter::RecoveryStamina()
 {
-	if (CurrentStamina < MaxStamina)
-	{
+	if (CurrentStamina < MaxStamina) {
 		CurrentStamina += TickRecoveryStamina;
-		if (CurrentStamina > MaxStamina)
-		{
+		if (CurrentStamina > MaxStamina) {
 			CurrentStamina = MaxStamina;
 		}
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, FString::Printf(TEXT("Stamina = %f"), CurrentStamina));
