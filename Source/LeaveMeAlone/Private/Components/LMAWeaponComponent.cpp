@@ -10,23 +10,24 @@ ULMAWeaponComponent::ULMAWeaponComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void ULMAWeaponComponent::Fire()
+void ULMAWeaponComponent::StartFire()
 {
-	if (Weapon && !AnimReloading) {
-		Weapon->Fire();
+	if (IsValid(Weapon) && !AnimReloading) {
+		Weapon->StartFire();
+	}
+}
+
+void ULMAWeaponComponent::StopFire()
+{
+	if (IsValid(Weapon) && !AnimReloading)
+	{
+		Weapon->StopFire();
 	}
 }
 
 void ULMAWeaponComponent::Reload()
 {
-	if (!CanReload()) {
-		return;
-	}
-		
-	Weapon->ChangeClip();
-	AnimReloading = true;
-	ACharacter* Character = Cast<ACharacter>(GetOwner());
-	Character->PlayAnimMontage(ReloadMontage);
+	CallBackReload();
 }
 
 void ULMAWeaponComponent::BeginPlay()
@@ -45,13 +46,15 @@ void ULMAWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 void ULMAWeaponComponent::SpawnWeapon()
 {
 	Weapon = GetWorld()->SpawnActor<ALMABaseWeapon>(WeaponClass);
-	if (Weapon) {
+	if (IsValid(Weapon)) {
 		const auto Character = Cast<ACharacter>(GetOwner());
 		if (Character) {
 			FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
 			Weapon->AttachToComponent(Character->GetMesh(), AttachmentRules, "r_Weapon_Socket");
 		}
 	}
+
+	Weapon->OutOfAmmo.AddUObject(this, &ULMAWeaponComponent::CallBackChangeClip);
 }
 
 void ULMAWeaponComponent::InitAnimNotify()
@@ -80,5 +83,27 @@ void ULMAWeaponComponent::OnNotifyReloadFinished(USkeletalMeshComponent* Skeleta
 
 bool ULMAWeaponComponent::CanReload() const
 {
-	return !AnimReloading;
+	if (!(Weapon->IsCurrentClipFull()))
+	{
+		return !AnimReloading;
+	}
+	return AnimReloading;
+}
+
+void ULMAWeaponComponent::CallBackChangeClip()
+{
+	CallBackReload();
+}
+
+void ULMAWeaponComponent::CallBackReload()
+{
+	if (!CanReload())
+	{
+		return;
+	}
+
+	Weapon->ChangeClip();
+	AnimReloading = true;
+	ACharacter* Character = Cast<ACharacter>(GetOwner());
+	Character->PlayAnimMontage(ReloadMontage);
 }

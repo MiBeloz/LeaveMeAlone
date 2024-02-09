@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "LMABaseWeapon.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOutOfAmmo);
+
 class USkeletalMeshComponent;
 
 USTRUCT(BlueprintType)
@@ -20,6 +22,9 @@ struct FAmmoWeapon
 	int32 Clips;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	float ShotsInterval;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
 	bool Infinite;
 };
 
@@ -31,8 +36,12 @@ class LEAVEMEALONE_API ALMABaseWeapon : public AActor
 public:	
 	ALMABaseWeapon();
 
-	void Fire();
+	void StartFire();
+	void StopFire();
 	void ChangeClip();
+	bool IsCurrentClipFull() const;
+
+	FOutOfAmmo OutOfAmmo;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
@@ -42,7 +51,7 @@ protected:
 	float TraceDistance = 800.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-	FAmmoWeapon AmmoWeapon{30, 0, true};
+	FAmmoWeapon AmmoWeapon{30, 1, 0.2f, false};
 
 	virtual void BeginPlay() override;
 
@@ -56,4 +65,5 @@ public:
 
 private:
 	FAmmoWeapon CurrentAmmoWeapon;
+	FTimerHandle FireTimerHandle;
 };

@@ -13,14 +13,35 @@ ALMABaseWeapon::ALMABaseWeapon()
 	SetRootComponent(WeaponComponent);
 }
 
-void ALMABaseWeapon::Fire()
+void ALMABaseWeapon::StartFire()
 {
-	Shoot();
+	if (CurrentAmmoWeapon.Bullets != 0) {
+		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ALMABaseWeapon::Shoot, AmmoWeapon.ShotsInterval, true, 0);
+	}
+}
+
+void ALMABaseWeapon::StopFire()
+{
+	GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
 }
 
 void ALMABaseWeapon::ChangeClip()
 {
-	CurrentAmmoWeapon.Bullets = AmmoWeapon.Bullets;
+	StopFire();
+	if (CurrentAmmoWeapon.Infinite) {
+		CurrentAmmoWeapon.Bullets = AmmoWeapon.Bullets;
+	}
+	else {
+		if (CurrentAmmoWeapon.Clips != 0) {
+			CurrentAmmoWeapon.Clips--;
+			CurrentAmmoWeapon.Bullets = AmmoWeapon.Bullets;
+		}
+	}
+}
+
+bool ALMABaseWeapon::IsCurrentClipFull() const
+{
+	return CurrentAmmoWeapon.Bullets == AmmoWeapon.Bullets;
 }
 
 void ALMABaseWeapon::BeginPlay()
@@ -41,7 +62,8 @@ void ALMABaseWeapon::Shoot()
 	FHitResult HitResult;
 	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility);
 
-	if (HitResult.bBlockingHit) {
+	if (HitResult.bBlockingHit)
+	{
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 5.0f, 24, FColor::Red, false, 1.0f);
 	}
 
@@ -53,8 +75,9 @@ void ALMABaseWeapon::DecrementBullets()
 	CurrentAmmoWeapon.Bullets--;
 	UE_LOG(LogWeapon, Display, TEXT("Bullets = %s"), *FString::FromInt(CurrentAmmoWeapon.Bullets));
 
-	if (IsCurrentClipEmpty()) {
-		ChangeClip();
+	if (IsCurrentClipEmpty() && !(IsCurrentClipFull()))
+	{
+		OutOfAmmo.Broadcast();
 	}
 }
 

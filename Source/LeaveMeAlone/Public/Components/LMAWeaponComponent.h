@@ -16,7 +16,8 @@ class LEAVEMEALONE_API ULMAWeaponComponent : public UActorComponent
 public:	
 	ULMAWeaponComponent();
 
-	void Fire();
+	void StartFire();
+	void StopFire();
 	void Reload();
 
 protected:
@@ -42,4 +43,6 @@ private:
 	void InitAnimNotify();
 	void OnNotifyReloadFinished(USkeletalMeshComponent* SkeletalMesh);
 	bool CanReload() const;
+	void CallBackChangeClip();
+	void CallBackReload();
 };
