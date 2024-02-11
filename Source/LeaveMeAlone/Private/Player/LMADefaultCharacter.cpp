@@ -134,7 +134,7 @@ void ALMADefaultCharacter::OnDeath()
 
 void ALMADefaultCharacter::OnHealthChanged(float NewHealth) 
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Health = %f"), NewHealth));
+	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Health = %f"), NewHealth));
 }
 
 void ALMADefaultCharacter::RotationPlayerOnCursor() 
@@ -168,7 +168,7 @@ void ALMADefaultCharacter::StopSprint()
 void ALMADefaultCharacter::LossStamina()
 {
 	CurrentStamina -= TickLossStamina;
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, FString::Printf(TEXT("Stamina = %f"), CurrentStamina));
+	GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Blue, FString::Printf(TEXT("Stamina = %f"), CurrentStamina));
 
 	if (CurrentStamina < TickLossStamina) {
 		StopSprint();
@@ -182,6 +182,6 @@ void ALMADefaultCharacter::RecoveryStamina()
 		if (CurrentStamina > MaxStamina) {
 			CurrentStamina = MaxStamina;
 		}
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, FString::Printf(TEXT("Stamina = %f"), CurrentStamina));
+		GEngine->AddOnScreenDebugMessage(-1, 0.01f, FColor::Blue, FString::Printf(TEXT("Stamina = %f"), CurrentStamina));
 	}
 }
