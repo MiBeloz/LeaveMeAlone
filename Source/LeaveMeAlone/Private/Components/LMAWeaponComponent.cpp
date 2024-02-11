@@ -30,6 +30,16 @@ void ULMAWeaponComponent::Reload()
 	CallBackReload();
 }
 
+bool ULMAWeaponComponent::GetCurrentWeaponAmmo(FAmmoWeapon& AmmoWeapon) const
+{
+	if (IsValid(Weapon))
+	{
+		AmmoWeapon = Weapon->GetCurrentAmmoWeapon();
+		return true;
+	}
+	return false;
+}
+
 void ULMAWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();

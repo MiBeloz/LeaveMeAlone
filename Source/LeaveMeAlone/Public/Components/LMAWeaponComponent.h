@@ -7,6 +7,7 @@
 #include "LMAWeaponComponent.generated.h"
 
 class ALMABaseWeapon;
+struct FAmmoWeapon;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class LEAVEMEALONE_API ULMAWeaponComponent : public UActorComponent
@@ -16,8 +17,12 @@ class LEAVEMEALONE_API ULMAWeaponComponent : public UActorComponent
 public:	
 	ULMAWeaponComponent();
 
+	UFUNCTION(BlueprintCallable)
 	void StartFire();
+
+	UFUNCTION(BlueprintCallable)
 	void StopFire();
+
 	void Reload();
 
 protected:
@@ -26,6 +31,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UAnimMontage* ReloadMontage;
+
+	UFUNCTION(BlueprintCallable)
+	bool GetCurrentWeaponAmmo(FAmmoWeapon& AmmoWeapon) const;
 
 	virtual void BeginPlay() override;
 
